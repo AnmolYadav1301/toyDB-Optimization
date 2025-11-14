@@ -15,6 +15,41 @@ int PFerrno = PFE_OK;	/* last error message */
 
 static PFftab_ele PFftab[PF_FTAB_SIZE]; /* table of opened files */
 
+
+int PF_BUFFER_SIZE = PF_MAX_BUFS;
+int PF_Replacement_Policy = REPL_LRU;
+
+PFStats PF_stats = {0,0,0,0,0,0};
+
+/* ================================
+   Assignment-added PF Functions
+   ================================ */
+
+void PF_SetBufferSize(int size)
+{
+    /* must be set before buffer pages are allocated */
+    PF_BUFFER_SIZE = size;
+}
+
+void PF_SetReplacementPolicy(int policy)
+{
+    if (policy == REPL_LRU || policy == REPL_MRU)
+        PF_Replacement_Policy = policy;
+    else
+        PF_Replacement_Policy = REPL_LRU; /* default */
+}
+
+void PF_ResetStats(void)
+{
+    PF_stats.logical_reads = 0;
+    PF_stats.logical_writes = 0;
+    PF_stats.physical_reads = 0;
+    PF_stats.physical_writes = 0;
+    PF_stats.cache_hits = 0;
+    PF_stats.cache_misses = 0;
+}
+
+
 /* true if file descriptor fd is invaild */
 #define PFinvalidFd(fd) ((fd) < 0 || (fd) >= PF_FTAB_SIZE \
 				|| PFftab[fd].fname == NULL)
@@ -122,6 +157,8 @@ int error;
 		else	PFerrno = PFE_INCOMPLETEREAD;
 		return(PFerrno);
 	}
+	/* ★ Step 2: count physical read */
+	PF_stats.physical_reads++;
 
 	return(PFE_OK);
 }
@@ -160,9 +197,9 @@ int error;
 		else	PFerrno = PFE_INCOMPLETEWRITE;
 		return(PFerrno);
 	}
-
+	/* ★ Step 2: count physical write */
+	PF_stats.physical_writes++;
 	return(PFE_OK);
-
 }
 
 
