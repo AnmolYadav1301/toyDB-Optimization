@@ -1,34 +1,74 @@
-a.out : am.o amfns.o amsearch.o aminsert.o amstack.o amglobals.o ../pflayer/pflayer.o main.o amscan.o amprint.o
-	cc am.o amfns.o amsearch.o aminsert.o  amstack.o amglobals.o ../pflayer/pflayer.o main.o amscan.o amprint.o 
+# ===============================
+#  AM Layer Build Makefile
+# ===============================
 
-amlayer.o : am.o amfns.o amsearch.o aminsert.o amstack.o amglobals.o amscan.o amprint.o
-	ld -r am.o amfns.o amsearch.o aminsert.o  amstack.o amglobals.o amscan.o amprint.o  -o amlayer.o
+CFLAGS = -std=gnu89 -Wno-implicit-int -Wno-old-style-definition \
+         -Wno-int-conversion -Wno-implicit-function-declaration \
+         -I. -I../pflayer
 
-am.o : am.c am.h pf.h
-	cc -c am.c
+# -------------------------------
+# Build all AM modules
+# -------------------------------
+AM_OBJS = am.o amfns.o amsearch.o aminsert.o amstack.o \
+          amglobals.o amscan.o amprint.o
 
-amfns.o : amfns.c am.h pf.h
-	cc -c amfns.c
+# Produce monolithic amlayer.o (used by bulk/incremental builders)
+amlayer.o : $(AM_OBJS)
+	ld -r $(AM_OBJS) -o amlayer.o
 
-amsearch.o : amsearch.c am.h pf.h
-	cc -c amsearch.c
 
-aminsert.o : aminsert.c am.h pf.h
-	cc -c aminsert.c
+# -------------------------------
+# Individual source compilations
+# -------------------------------
 
-amscan.o : amscan.c am.h pf.h
-	cc -c amscan.c
+am.o : am.c am.h ../pflayer/pf.h
+	cc $(CFLAGS) -c am.c
 
-amstack.o : amstack.c am.h pf.h
-	cc -c amstack.c
+amfns.o : amfns.c am.h ../pflayer/pf.h
+	cc $(CFLAGS) -c amfns.c
+
+amsearch.o : amsearch.c am.h ../pflayer/pf.h
+	cc $(CFLAGS) -c amsearch.c
+
+aminsert.o : aminsert.c am.h ../pflayer/pf.h
+	cc $(CFLAGS) -c aminsert.c
+
+amscan.o : amscan.c am.h ../pflayer/pf.h
+	cc $(CFLAGS) -c amscan.c
+
+amstack.o : amstack.c am.h
+	cc $(CFLAGS) -c amstack.c
 
 amglobals.o : amglobals.c am.h
-	cc -c amglobals.c
+	cc $(CFLAGS) -c amglobals.c
 
-amprint.o : amprint.c am.h pf.h 
-	cc -c amprint.c
-	
-main.o : main.c am.h pf.h 
-	cc -c main.c
+amprint.o : amprint.c am.h ../pflayer/pf.h
+	cc $(CFLAGS) -c amprint.c
 
 
+# -------------------------------
+# AM test program (optional)
+# -------------------------------
+a.out : $(AM_OBJS) ../pflayer/pflayer.o main.o
+	cc $(CFLAGS) $(AM_OBJS) ../pflayer/pflayer.o main.o -o a.out
+
+main.o : main.c am.h ../pflayer/pf.h
+	cc $(CFLAGS) -c main.c
+
+
+# -------------------------------
+# Build Index Programs
+# -------------------------------
+
+build_index_bulk : amlayer.o ../pflayer/pflayer.o build_index_bulk.c
+	cc $(CFLAGS) amlayer.o ../pflayer/pflayer.o build_index_bulk.c -o build_index_bulk
+
+build_index_incremental : amlayer.o ../pflayer/pflayer.o build_index_incremental.c
+	cc $(CFLAGS) amlayer.o ../pflayer/pflayer.o build_index_incremental.c -o build_index_incremental
+
+
+# -------------------------------
+# Clean
+# -------------------------------
+clean:
+	rm -f *.o a.out amlayer.o build_index_bulk build_index_incremental

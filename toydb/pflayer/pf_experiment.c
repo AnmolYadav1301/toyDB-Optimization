@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "pf.h"        // MUST come first – contains PF API declarations
-#include "pftypes.h"   // internal structs – OK to include after pf.h
+#include "pf.h"
+#include "pftypes.h"
 
 #define FNAME "expfile"
 
@@ -34,11 +34,11 @@ void run_experiment(int policy, int writePct, int nPages, int accesses,
             PF_PrintError("alloc");
             exit(1);
         }
-        buf[0] = 0;  /* store something */
+        buf[0] = 0;
         PF_UnfixPage(fd, pnum, TRUE);
     }
 
-    /* Run random accesses */
+    /* Random workload */
     for (i = 0; i < accesses; i++) {
         int page = rand() % nPages;
 
@@ -48,14 +48,14 @@ void run_experiment(int policy, int writePct, int nPages, int accesses,
         }
 
         if ((rand() % 100) < writePct) {
-            buf[0]++;                   /* modify */
+            buf[0]++;
             PF_UnfixPage(fd, page, TRUE);
         } else {
             PF_UnfixPage(fd, page, FALSE);
         }
     }
 
-    /* Write CSV row */
+    /* Write CSV */
     fprintf(out,
         "%d,%d,%d,%d,%ld,%ld,%ld,%ld,%ld,%ld\n",
         policy,
@@ -76,13 +76,15 @@ void run_experiment(int policy, int writePct, int nPages, int accesses,
 
 int main()
 {
-    FILE *out = fopen("pf_results.csv", "w");
+    FILE *out;
+    int p, m;
+
+    out = fopen("pf_results.csv", "w");
     if (!out) {
         perror("pf_results.csv");
         return 1;
     }
 
-    /* CSV header */
     fprintf(out,
         "policy,bufferSize,nPages,writePct,"
         "logicalReads,logicalWrites,"
@@ -92,21 +94,23 @@ int main()
 
     srand((unsigned)time(NULL));
 
-    int policies[2] = {REPL_LRU, REPL_MRU};
-    int mixes[] = {0, 10, 30, 50, 70, 90};
-    int bsize = 20;
-    int nPages = 200;
-    int accesses = 20000;
+    {
+        int policies[2] = {REPL_LRU, REPL_MRU};
+        int mixes[6] = {0, 10, 30, 50, 70, 90};
+        int bsize = 20;
+        int nPages = 200;
+        int accesses = 20000;
 
-    for (int p = 0; p < 2; p++) {
-        for (int m = 0; m < 6; m++) {
-            run_experiment(policies[p], mixes[m], nPages,
-                           accesses, bsize, out);
-            fflush(out);
+        for (p = 0; p < 2; p++) {
+            for (m = 0; m < 6; m++) {
+                run_experiment(policies[p], mixes[m], nPages,
+                               accesses, bsize, out);
+                fflush(out);
+            }
         }
     }
 
     fclose(out);
-    printf("Experiment finished. Results in pf_results.csv\n");
+    printf("Experiment finished → pf_results.csv\n");
     return 0;
 }

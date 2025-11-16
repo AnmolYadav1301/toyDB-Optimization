@@ -1,0 +1,76 @@
+# ------------------------
+# OS / Editor junk
+# ------------------------
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ------------------------
+# Build artifacts
+# ------------------------
+*.o
+*.out
+*.a
+*.so
+*.exe
+*.stackdump
+
+# AM layer build files
+amlayer/*.o
+amlayer/amlayer.o
+amlayer/a.out
+
+# PF layer build files
+pflayer/*.o
+pflayer/pflayer.o
+
+# Test executables
+testpf
+testhash
+test_slotted
+slotted_analysis
+test1
+test2
+test3
+build_index_bulk
+build_index_incremental
+pf_experiment
+
+# ------------------------
+# Python venv
+# ------------------------
+venv/
+__pycache__/
+*.pyc
+
+# ------------------------
+# Ignore temporary DB and index files
+# (Keep CSV and PNG results)
+# ------------------------
+data/
+*.db
+*.bin
+*.idx
+*.tmp
+*.1        # Index files from AM layer
+*.dat
+
+# ------------------------
+# Logs
+# ------------------------
+*.log
+
+# ------------------------
+# Jupyter notebooks junk
+# ------------------------
+.ipynb_checkpoints/
+
+# ------------------------
+# Backup files
+# ------------------------
+*.bak
+*.old
+*~
+

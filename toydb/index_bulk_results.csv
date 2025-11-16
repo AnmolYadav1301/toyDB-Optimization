@@ -1,0 +1,2 @@
+recordsInserted,logicalReads,logicalWrites,physicalReads,physicalWrites,cacheHits,cacheMisses
+10000,15884,6601,6431,13162,15884,6431

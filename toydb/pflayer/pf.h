@@ -51,7 +51,6 @@ typedef struct {
 /******************* Extern Globals *******************/
 extern int PFerrno;
 extern PFStats PF_stats;
-
 extern int PF_BUFFER_SIZE;        /* dynamic buffer pool size */
 extern int PF_Replacement_Policy; /* LRU (default) / MRU */
 
